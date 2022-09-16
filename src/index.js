@@ -19,4 +19,4 @@ server.get('/status', (req, res) => {
 server.use(authRouter);
 server.use(productsRouter);
 
-server.listen(process.env.PORT, () => console.log(`Listening on port ${process.env.PORT}...`));
+server.listen(process.env.DEV_PORT, () => console.log(`Listening on port ${process.env.DEV_PORT}...`));
