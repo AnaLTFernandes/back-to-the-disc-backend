@@ -68,4 +68,8 @@ async function signIn(req, res) {
   }
 }
 
-export { signUp, signIn };
+async function logout(req, res) {
+  res.sendStatus(STATUS_CODE.OK);
+}
+
+export { signUp, signIn, logout };
