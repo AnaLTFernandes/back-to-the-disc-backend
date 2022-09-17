@@ -31,8 +31,20 @@ async function insertHistoric(req, res) {
 }
 
 async function getHistoric(req, res) {
-  const { token } = req.locals;
+  const { session } = req.locals;
 
+  let historic;
+
+  try {
+    historic = await db
+      .collection(COLLECTIONS.HISTORIC)
+      .findOne({ userId: session.userId });
+  } catch (err) {
+    console.error(err);
+    return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+  }
+
+  return res.status(STATUS_CODE.OK).send(historic.historic);
 }
 
 export { insertHistoric, getHistoric };

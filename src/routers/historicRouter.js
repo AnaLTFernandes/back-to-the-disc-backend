@@ -7,6 +7,6 @@ const router = express.Router();
 router.use(hasToken);
 
 router.post("/historic", insertHistoric);
-router.post("/historic", getHistoric);
+router.get("/historic", getHistoric);
 
 export default router;
