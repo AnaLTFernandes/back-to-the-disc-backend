@@ -68,4 +68,33 @@ async function signIn(req, res) {
   }
 }
 
-export { signUp, signIn };
+async function logout(req, res) {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+
+  if (!token) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
+
+  let session;
+
+  try {
+    session = await db.collection(COLLECTIONS.SESSIONS).findOne({ token });
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+  }
+
+  if (!session) return res.sendStatus(STATUS_CODE.NOT_FOUND);
+
+  try {
+    session = await db.collection(COLLECTIONS.SESSIONS).updateOne(
+      { token },
+      { $set: { status:'inactive' }}
+    );
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+  }
+
+  res.sendStatus(STATUS_CODE.OK);
+}
+
+export { signUp, signIn, logout };
