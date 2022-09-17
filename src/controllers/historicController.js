@@ -6,7 +6,6 @@ const db = await mongo();
 
 async function insertHistoric(req, res) {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  const { name, image, price, quantity } = req.body;
 
   try {
     const session = await db
@@ -23,15 +22,16 @@ async function insertHistoric(req, res) {
       .collection(COLLECTIONS.USERS)
       .findOne({ _id: session.userId });
 
-    await db.collection(COLLECTIONS.HISTORIC).insertOne({
-      userId: user._id,
-      historic: [
+    await db.collection(COLLECTIONS.HISTORIC).updateOne(
+      { userId: user._id },
+      { $push: {
+        historic:
         {
           date: new Date(),
-          products: [req.body],
+          products: [...req.body],
         },
-      ],
-    });
+      }}
+    );
 
     return res.sendStatus(STATUS_CODE.CREATED);
   } catch (err) {
