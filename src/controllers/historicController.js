@@ -5,7 +5,7 @@ import { COLLECTIONS } from "../enums/collections.js";
 const db = await mongo();
 
 async function insertHistoric(req, res) {
-  const { session } = req.locals;
+  const { session } = res.locals;
 
   try {
     const user = await db
@@ -31,7 +31,7 @@ async function insertHistoric(req, res) {
 }
 
 async function getHistoric(req, res) {
-  const { session } = req.locals;
+  const { session } = res.locals;
 
   let historic;
 

@@ -27,8 +27,8 @@ async function hasToken (req, res, next) {
             .send({ message: "Usuário não está logado." });
     }
 
-    req.locals.token = token;
-    req.locals.session = session;
+    res.locals.token = token;
+    res.locals.session = session;
 
     next();
 }

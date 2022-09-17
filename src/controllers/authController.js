@@ -78,7 +78,7 @@ async function signIn(req, res) {
 }
 
 async function logout(req, res) {
-  const { token } = req.locals;
+  const { token } = res.locals;
 
   try {
     await db.collection(COLLECTIONS.SESSIONS).updateOne(
