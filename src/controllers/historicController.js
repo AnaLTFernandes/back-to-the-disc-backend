@@ -5,19 +5,9 @@ import { COLLECTIONS } from "../enums/collections.js";
 const db = await mongo();
 
 async function insertHistoric(req, res) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
+  const { session } = req.locals;
 
   try {
-    const session = await db
-      .collection(COLLECTIONS.SESSIONS)
-      .findOne({ token });
-
-    if (!session || session.status === "inactive") {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .send({ message: "Usuário não está logado" });
-    }
-
     const user = await db
       .collection(COLLECTIONS.USERS)
       .findOne({ _id: session.userId });
@@ -40,4 +30,9 @@ async function insertHistoric(req, res) {
   }
 }
 
-export { insertHistoric };
+async function getHistoric(req, res) {
+  const { token } = req.locals;
+
+}
+
+export { insertHistoric, getHistoric };
