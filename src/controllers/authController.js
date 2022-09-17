@@ -20,10 +20,19 @@ async function signUp(req, res) {
       return res.sendStatus(STATUS_CODE.CONFLICT);
     }
 
-    db.collection(COLLECTIONS.USERS).insertOne({
+    await db.collection(COLLECTIONS.USERS).insertOne({
       name,
       email,
       password: hashPassword,
+    });
+
+    const user = await db
+      .collection(COLLECTIONS.USERS)
+      .findOne({ email });
+
+    await db.collection(COLLECTIONS.HISTORIC).insertOne({
+      userId: user._id,
+      historic: [],
     });
 
     return res.sendStatus(STATUS_CODE.CREATED);
