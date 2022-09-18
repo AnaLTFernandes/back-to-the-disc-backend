@@ -5,34 +5,25 @@ import { COLLECTIONS } from "../enums/collections.js";
 const db = await mongo();
 
 async function insertHistoric(req, res) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
+  const { session } = res.locals;
   const {products, payment} = req.body;
 
   try {
-    const session = await db
-      .collection(COLLECTIONS.SESSIONS)
-      .findOne({ token });
-
-    if (!session || session.status === "inactive") {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .send({ message: "Usuário não está logado" });
-    }
-
     const user = await db
       .collection(COLLECTIONS.USERS)
       .findOne({ _id: session.userId });
 
-    await db.collection(COLLECTIONS.HISTORIC).insertOne({
-      userId: user._id,
-      historic: [
+    await db.collection(COLLECTIONS.HISTORIC).updateOne(
+      { userId: user._id },
+      { $push: {
+        historic:
         {
           date: new Date(),
           products: products,
           payment: payment
         },
-      ],
-    });
+      }}
+    );
 
     return res.sendStatus(STATUS_CODE.CREATED);
   } catch (err) {
@@ -41,4 +32,21 @@ async function insertHistoric(req, res) {
   }
 }
 
-export { insertHistoric };
+async function getHistoric(req, res) {
+  const { session } = res.locals;
+
+  let historic;
+
+  try {
+    historic = await db
+      .collection(COLLECTIONS.HISTORIC)
+      .findOne({ userId: session.userId });
+  } catch (err) {
+    console.error(err);
+    return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+  }
+
+  return res.status(STATUS_CODE.OK).send(historic.historic);
+}
+
+export { insertHistoric, getHistoric };

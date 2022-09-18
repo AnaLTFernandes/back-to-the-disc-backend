@@ -20,10 +20,19 @@ async function signUp(req, res) {
       return res.sendStatus(STATUS_CODE.CONFLICT);
     }
 
-    db.collection(COLLECTIONS.USERS).insertOne({
+    await db.collection(COLLECTIONS.USERS).insertOne({
       name,
       email,
       password: hashPassword,
+    });
+
+    const user = await db
+      .collection(COLLECTIONS.USERS)
+      .findOne({ email });
+
+    await db.collection(COLLECTIONS.HISTORIC).insertOne({
+      userId: user._id,
+      historic: [],
     });
 
     return res.sendStatus(STATUS_CODE.CREATED);
@@ -69,23 +78,10 @@ async function signIn(req, res) {
 }
 
 async function logout(req, res) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-
-  if (!token) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
-
-  let session;
+  const { token } = res.locals;
 
   try {
-    session = await db.collection(COLLECTIONS.SESSIONS).findOne({ token });
-  } catch (error) {
-    console.log(error);
-    return res.sendStatus(STATUS_CODE.SERVER_ERROR);
-  }
-
-  if (!session) return res.sendStatus(STATUS_CODE.NOT_FOUND);
-
-  try {
-    session = await db.collection(COLLECTIONS.SESSIONS).updateOne(
+    await db.collection(COLLECTIONS.SESSIONS).updateOne(
       { token },
       { $set: { status:'inactive' }}
     );
