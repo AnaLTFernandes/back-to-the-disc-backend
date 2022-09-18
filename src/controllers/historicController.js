@@ -6,7 +6,7 @@ const db = await mongo();
 
 async function insertHistoric(req, res) {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  const { name, image, price, quantity } = req.body;
+  const {products, payment} = req.body;
 
   try {
     const session = await db
@@ -28,7 +28,8 @@ async function insertHistoric(req, res) {
       historic: [
         {
           date: new Date(),
-          products: [req.body],
+          products: products,
+          payment: payment
         },
       ],
     });
