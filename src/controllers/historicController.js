@@ -1,41 +1,44 @@
 import mongo from "../database/db.js";
-import sgMail from "@sendgrid/mail";
-import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+
 import { STATUS_CODE } from "../enums/statusCode.js";
 import { COLLECTIONS } from "../enums/collections.js";
 
-dotenv.config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const db = await mongo();
+
+let transpoter = nodemailer.createTransport({
+  host: "SMTP.office365.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: "backtothedisc@outlook.com",
+    pass: "projeto14driven2022",
+  },
+});
 
 async function insertHistoric(req, res) {
   const { session } = res.locals;
   const { products, payment, sendEmail } = req.body;
+
+  let discs = products.map((value) => value.name);
+
+  discs = discs.toString().replace(",", ", ");
 
   const user = await db
     .collection(COLLECTIONS.USERS)
     .findOne({ _id: session.userId });
 
   if (sendEmail) {
-    const msg = {
-      to: user.email,
-      from: "backtothedisc@gmail.com",
-      subject: "Back To The Disc informa",
-      text: "Compra efetuada com sucesso! Agradecemos sua preferência.",
-      html: "<strong>Compra efetuada com sucesso! Agradecemos sua preferência.</strong>",
-    };
-
-    try {
-      await sgMail.send(msg);
-      console.log("Email sent");
-    } catch (error) {
-      console.error(error);
-
-      if (error.response) {
-        console.error(error.response.body);
-      }
-    }
+    transpoter
+      .sendMail({
+        from: "Back To The Disc <backtothedisc@outlook.com>",
+        to: user.email,
+        subject: "Back To The Disc informa!",
+        text: "Compra efetuada com sucesso! Agradecemos sua preferência",
+        html: `<h3>Compra efetuada com sucesso! Agradecemos sua preferência</h3><p>Discos comprados por você: ${discs}</p>`,
+      })
+      .then(() => console.log("E-mail sent!"))
+      .catch((err) => console.error(err));
   }
 
   try {

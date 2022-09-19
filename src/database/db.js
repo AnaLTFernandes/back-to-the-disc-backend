@@ -1,8 +1,6 @@
 import { MongoClient } from "mongodb";
 
-
-//const mongoClient = new MongoClient(MONGO_URI);
-const mongoClient = new MongoClient("mongodb://localhost:27017")
+const mongoClient = new MongoClient(MONGO_URI);
 
 export default async function mongo() {
   try {
