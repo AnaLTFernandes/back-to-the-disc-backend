@@ -1,14 +1,12 @@
 import mongo from "../database/db.js";
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
 
 import { STATUS_CODE } from "../enums/statusCode.js";
 import { COLLECTIONS } from "../enums/collections.js";
 
 const db = await mongo();
 
-dotenv.config();
-const PASSWORD = process.env.NODEMAILER_PASSWORD;
+const PASSWORD = "projeto14driven2022";
 
 let transpoter = nodemailer.createTransport({
   host: "SMTP.office365.com",
@@ -42,7 +40,7 @@ async function insertHistoric(req, res) {
 
     try {
       console.log("E-mail sent!");
-    } catch {
+    } catch (err) {
       console.error(err);
     }
   }

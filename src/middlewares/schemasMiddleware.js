@@ -22,12 +22,11 @@ function signUpSchemaMiddleware(req, res, next) {
 }
 
 function signInSchemaMiddleware(req, res, next) {
-  const { email, password } = req.body;
+  const { email } = req.body;
 
   const isValid = signInSchema.validate(
     {
       email,
-      password,
     },
     { abortEarly: false }
   );
