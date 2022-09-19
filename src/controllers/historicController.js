@@ -1,11 +1,11 @@
 import mongo from "../database/db.js";
+import sgMail from "@sendgrid/mail";
+import dotenv from "dotenv";
 import { STATUS_CODE } from "../enums/statusCode.js";
 import { COLLECTIONS } from "../enums/collections.js";
 
-import sgMail from "@sendgrid/mail";
-const SENDGRID_API_KEY =
-  "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";
-sgMail.setApiKey(SENDGRID_API_KEY);
+dotenv.config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const db = await mongo();
 
@@ -31,6 +31,10 @@ async function insertHistoric(req, res) {
       console.log("Email sent");
     } catch (error) {
       console.error(error);
+
+      if (error.response) {
+        console.error(error.response.body);
+      }
     }
   }
 
