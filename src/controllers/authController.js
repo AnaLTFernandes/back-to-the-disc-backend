@@ -1,10 +1,14 @@
 import mongo from "../database/db.js";
 import bcrypt from "bcrypt";
-import { v4 as uuid } from "uuid";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 import { STATUS_CODE } from "../enums/statusCode.js";
 import { COLLECTIONS } from "../enums/collections.js";
 
 const db = await mongo();
+
+dotenv.config();
+const SECRET_PASSWORD = process.env.JWT_SECRET;
 
 async function signUp(req, res) {
   const { name, email, password } = req.body;
@@ -26,9 +30,7 @@ async function signUp(req, res) {
       password: hashPassword,
     });
 
-    const user = await db
-      .collection(COLLECTIONS.USERS)
-      .findOne({ email });
+    const user = await db.collection(COLLECTIONS.USERS).findOne({ email });
 
     await db.collection(COLLECTIONS.HISTORIC).insertOne({
       userId: user._id,
@@ -47,7 +49,7 @@ async function signIn(req, res) {
 
   try {
     const user = await db.collection(COLLECTIONS.USERS).findOne({ email });
-
+    
     if (!user) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
@@ -62,7 +64,9 @@ async function signIn(req, res) {
         .send({ message: "E-mail ou senha inválidos!" });
     }
 
-    const token = uuid();
+    const token = jwt.sign({ userId: user._id }, SECRET_PASSWORD, {
+      expiresIn: 60 * 60 * 24 * 30,
+    });
 
     await db.collection(COLLECTIONS.SESSIONS).insertOne({
       userId: user._id,
@@ -81,10 +85,9 @@ async function logout(req, res) {
   const { token } = res.locals;
 
   try {
-    await db.collection(COLLECTIONS.SESSIONS).updateOne(
-      { token },
-      { $set: { status:'inactive' }}
-    );
+    await db
+      .collection(COLLECTIONS.SESSIONS)
+      .updateOne({ token }, { $set: { status: "inactive" } });
   } catch (error) {
     console.log(error);
     return res.sendStatus(STATUS_CODE.SERVER_ERROR);
