@@ -1,6 +1,6 @@
 import mongo from "../database/db.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
 import dotenv from "dotenv";
 import { STATUS_CODE } from "../enums/statusCode.js";
 import { COLLECTIONS } from "../enums/collections.js";
@@ -8,7 +8,7 @@ import { COLLECTIONS } from "../enums/collections.js";
 const db = await mongo();
 
 dotenv.config();
-const SECRET_PASSWORD = process.env.JWT_SECRET;
+const SECRET_PASSWORD = "backtothedisctool";
 
 async function signUp(req, res) {
   const { name, email, password } = req.body;
@@ -49,7 +49,7 @@ async function signIn(req, res) {
 
   try {
     const user = await db.collection(COLLECTIONS.USERS).findOne({ email });
-    
+
     if (!user) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
@@ -64,9 +64,7 @@ async function signIn(req, res) {
         .send({ message: "E-mail ou senha inválidos!" });
     }
 
-    const token = jwt.sign({ userId: user._id }, SECRET_PASSWORD, {
-      expiresIn: 60 * 60 * 24 * 30,
-    });
+    const token = uuid();
 
     await db.collection(COLLECTIONS.SESSIONS).insertOne({
       userId: user._id,
