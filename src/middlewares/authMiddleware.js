@@ -4,9 +4,6 @@ import { COLLECTIONS } from "../enums/collections.js";
 
 const db = await mongo();
 
-
-const SECRET_PASSWORD = "backtothedisctool";
-
 async function hasToken(req, res, next) {
   const token = req.headers.authorization?.replace("Bearer ", "");
 
