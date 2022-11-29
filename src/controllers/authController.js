@@ -8,7 +8,6 @@ import { COLLECTIONS } from "../enums/collections.js";
 const db = await mongo();
 
 dotenv.config();
-const SECRET_PASSWORD = "backtothedisctool";
 
 async function signUp(req, res) {
   const { name, email, password } = req.body;
